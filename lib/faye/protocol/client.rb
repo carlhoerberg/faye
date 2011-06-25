@@ -251,7 +251,7 @@ module Faye
     # MAY include:   * clientId            MAY include:   * id
     #                * id                                 * error
     #                * ext                                * ext
-    def publish(channel, data)
+    def publish(channel, data, &callback)
       unless Grammar::CHANNEL_NAME =~ channel
         raise "Cannot publish: '#{channel}' is not a valid channel name"
       end
@@ -263,7 +263,7 @@ module Faye
           'channel'   => channel,
           'data'      => data,
           'clientId'  => @client_id
-        })
+        }, &callback)
       }
     end
     
