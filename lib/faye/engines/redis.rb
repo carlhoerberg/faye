@@ -147,6 +147,7 @@ module Faye
       end
       
       def gc
+        puts ['timeout', @timeout.inspect]
         return unless Numeric === @timeout
         with_lock 'gc' do |release_lock|
           cutoff = Time.now.to_i - 2 * @timeout
