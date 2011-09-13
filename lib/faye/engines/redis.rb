@@ -147,7 +147,6 @@ module Faye
       end
       
       def gc
-        puts ['timeout', @timeout.inspect]
         return unless Numeric === @timeout
         with_lock 'gc' do |release_lock|
           cutoff = Time.now.to_i - 2 * @timeout
@@ -169,11 +168,11 @@ module Faye
       
       def with_lock(lock_name, &block)
         lock_key     = @ns + '/locks/' + lock_name
-        current_time = Time.now.to_i * 1000
+        current_time = (Time.now.to_f * 1000).to_i
         expiry       = current_time + LOCK_TIMEOUT * 1000 + 1
         
         release_lock = lambda do
-          @redis.del(lock_key) if Time.now.to_i * 1000 < expiry
+          @redis.del(lock_key) if (Time.now.to_f * 1000).to_i < expiry
         end
         
         @redis.setnx(lock_key, expiry) do |set|
@@ -181,7 +180,6 @@ module Faye
             block.call(release_lock)
           else
             @redis.get(lock_key) do |timeout|
-              puts timeout.class
               lock_timeout = timeout.to_i(10)
               if lock_timeout < current_time
                 @redis.getset(lock_key, expiry) do |old_value|
